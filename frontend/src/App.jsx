@@ -1,24 +1,31 @@
-import { useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import TaskPage from "./pages/TaskPage";
 
-function App() {
-  const [loggedIn, setLoggedIn] = useState(
-    !!localStorage.getItem("token")
-  );
-  const [showRegister, setShowRegister] = useState(false);
+const App = () => {
+  const token = localStorage.getItem("token");
 
-  if (loggedIn) return <TaskPage />;
-
-  return showRegister ? (
-    <Register onBackToLogin={() => setShowRegister(false)} />
-  ) : (
-    <Login
-      onLogin={() => setLoggedIn(true)}
-      onRegister={() => setShowRegister(true)}
-    />
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* If logged in → dashboard */}
+        {token ? (
+          <>
+            <Route path="/" element={<TaskPage />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </>
+        ) : (
+          <>
+            {/* Auth pages */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="*" element={<Navigate to="/login" />} />
+          </>
+        )}
+      </Routes>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;
