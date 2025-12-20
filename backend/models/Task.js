@@ -22,6 +22,19 @@ const taskSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+
+    userName: {
+      type: String,
+      required: true,
+    },
+
   },
   { timestamps: true }
 );

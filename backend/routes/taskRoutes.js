@@ -1,35 +1,38 @@
 const express = require("express");
 const router = express.Router();
 const Task = require("../models/Task");
+const auth = require("../middleware/authMiddleware");
 
 /**
- * GET ALL TASKS (WITH FILTERS)
+ * GET ALL TASKS (WITH FILTERS) — PROTECTED
  */
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   try {
-    const { status, sortPriority, sortBy } = req.query;
+    const { status, sortBy, sortPriority } = req.query;
 
-    let matchStage = {};
+    let query = { userId: req.userId };
 
-    if (status === "pending") matchStage.completed = false;
-    if (status === "completed") matchStage.completed = true;
+    // FILTER
+    if (status === "pending") query.completed = false;
+    if (status === "completed") query.completed = true;
 
-    // PRIORITY CUSTOM SORT
-    let priorityOrder = ["high", "medium", "low"];
-    if (sortPriority === "medium")
-      priorityOrder = ["medium", "high", "low"];
-    if (sortPriority === "low")
-      priorityOrder = ["low", "medium", "high"];
-
-    // DUE DATE SORT
+    // SORT BY DUE DATE
     if (sortBy === "dueDate") {
-      const tasks = await Task.find(matchStage).sort({ dueDate: 1 });
+      const tasks = await Task.find(query).sort({ dueDate: 1 });
       return res.json(tasks);
     }
 
-    // PRIORITY SORT (aggregation)
+    // PRIORITY SORT
+    let priorityOrder = ["high", "medium", "low"];
+
+    if (sortPriority === "medium")
+      priorityOrder = ["medium", "high", "low"];
+
+    if (sortPriority === "low")
+      priorityOrder = ["low", "medium", "high"];
+
     const tasks = await Task.aggregate([
-      { $match: matchStage },
+      { $match: query },
       {
         $addFields: {
           priorityIndex: {
@@ -49,28 +52,38 @@ router.get("/", async (req, res) => {
 
 
 /**
- * CREATE TASK
+ * CREATE TASK — PROTECTED
  */
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   try {
-    const task = new Task(req.body);
-    const savedTask = await task.save();
-    res.status(201).json(savedTask);
+    const task = await Task.create({
+      ...req.body,
+      userId: req.userId,     // 🔐 owner ID
+      userName: req.userName // 👈 store owner name
+    });
+
+    res.status(201).json(task);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
+
 /**
- * UPDATE TASK
+ * UPDATE TASK — PROTECTED & OWNERSHIP CHECK
  */
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
-    const updated = await Task.findByIdAndUpdate(
-      req.params.id,
+    const updated = await Task.findOneAndUpdate(
+      { _id: req.params.id, userId: req.userId }, // 🔐 ownership
       req.body,
       { new: true }
     );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
     res.json(updated);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -78,11 +91,19 @@ router.put("/:id", async (req, res) => {
 });
 
 /**
- * DELETE TASK
+ * DELETE TASK — PROTECTED & OWNERSHIP CHECK
  */
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
-    await Task.findByIdAndDelete(req.params.id);
+    const deleted = await Task.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.userId, // 🔐 ownership
+    });
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
     res.json({ message: "Task deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });

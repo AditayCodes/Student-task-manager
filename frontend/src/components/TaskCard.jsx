@@ -5,6 +5,11 @@ import EditTaskModal from "./EditTaskModal";
 const TaskCard = ({ task, onUpdate }) => {
   const [showEdit, setShowEdit] = useState(false);
 
+  const isOverdue =
+    task.dueDate &&
+    new Date(task.dueDate) < new Date() &&
+    !task.completed;
+
   const toggleStatus = async () => {
     await API.put(`/tasks/${task._id}`, {
       completed: !task.completed,
@@ -32,9 +37,10 @@ const TaskCard = ({ task, onUpdate }) => {
         dark:border-gray-700
         flex flex-col sm:flex-row justify-between gap-4
         ${task.completed ? "opacity-80" : ""}
+        ${isOverdue ? "border-red-500" : ""}
       `}
       >
-        {/* LEFT: TASK DETAILS */}
+        {/* LEFT */}
         <div>
           <h3
             className={`text-lg font-semibold ${
@@ -56,12 +62,18 @@ const TaskCard = ({ task, onUpdate }) => {
             {task.description}
           </p>
 
+          {/* CREATED BY */}
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Created by:{" "}
+            <span className="font-medium">{task.userName}</span>
+          </p>
+
           <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
             Due: {task.dueDate?.slice(0, 10)}
           </p>
 
-          {/* STATUS + PRIORITY */}
-          <div className="flex items-center gap-2 mt-2">
+          {/* STATUS + PRIORITY + OVERDUE */}
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
             <span
               className={`px-2 py-1 text-xs rounded font-medium ${
                 task.completed
@@ -79,10 +91,16 @@ const TaskCard = ({ task, onUpdate }) => {
             >
               {task.priority.toUpperCase()}
             </span>
+
+            {isOverdue && (
+              <span className="px-2 py-1 text-xs rounded font-semibold bg-red-600 text-white">
+                OVERDUE
+              </span>
+            )}
           </div>
         </div>
 
-        {/* RIGHT: ACTION BUTTONS */}
+        {/* RIGHT */}
         <div className="flex items-center gap-2">
           <button
             onClick={toggleStatus}
@@ -97,16 +115,14 @@ const TaskCard = ({ task, onUpdate }) => {
 
           <button
             onClick={() => setShowEdit(true)}
-            className="px-3 py-1.5 text-sm bg-yellow-500 hover:bg-yellow-600
-                     text-white rounded"
+            className="px-3 py-1.5 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded"
           >
             Edit
           </button>
 
           <button
             onClick={deleteTask}
-            className="px-3 py-1.5 text-sm bg-red-600 hover:bg-red-700
-                     text-white rounded"
+            className="px-3 py-1.5 text-sm bg-red-600 hover:bg-red-700 text-white rounded"
           >
             Delete
           </button>

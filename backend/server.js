@@ -3,14 +3,17 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
+const authRoutes = require("./routes/authRoutes");
+const taskRoutes = require("./routes/taskRoutes");
+
 const app = express();
 
-/* Middleware */
+/* 🔑 VERY IMPORTANT — BODY PARSING FIRST */
 app.use(cors({ origin: "*" }));
-app.use(express.json());
+app.use(express.json()); // 👈 MUST be before routes
 
 /* Routes */
-const taskRoutes = require("./routes/taskRoutes");
+app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 
 /* Test Route */
