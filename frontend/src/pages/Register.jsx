@@ -1,7 +1,6 @@
 import { useState } from "react";
 import API from "../services/api";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -9,6 +8,8 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -22,23 +23,27 @@ const Register = () => {
         password,
       });
 
-      setSuccess("Account created successfully. Please login.");
-      setName("");
-      setEmail("");
-      setPassword("");
+      setSuccess("Account created successfully. Redirecting to login...");
+
+      // redirect after short delay
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
     } catch (err) {
       setError("User already exists or invalid data");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center
+    <div
+      className="min-h-screen flex items-center justify-center
       bg-gradient-to-br from-green-500 via-teal-500 to-blue-500
-      dark:from-gray-900 dark:via-gray-800 dark:to-gray-900
-    ">
-      <div className="w-full max-w-md bg-white dark:bg-gray-800
-        rounded-2xl shadow-2xl p-8
-      ">
+      dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
+    >
+      <div
+        className="w-full max-w-md bg-white dark:bg-gray-800
+        rounded-2xl shadow-2xl p-8"
+      >
         {/* TITLE */}
         <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white">
           Create Account ✨
@@ -77,8 +82,7 @@ const Register = () => {
                 border border-gray-300
                 focus:ring-2 focus:ring-green-500
                 focus:outline-none
-                dark:bg-gray-700 dark:border-gray-600 dark:text-white
-              "
+                dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             />
           </div>
 
@@ -96,8 +100,7 @@ const Register = () => {
                 border border-gray-300
                 focus:ring-2 focus:ring-green-500
                 focus:outline-none
-                dark:bg-gray-700 dark:border-gray-600 dark:text-white
-              "
+                dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             />
           </div>
 
@@ -115,8 +118,7 @@ const Register = () => {
                 border border-gray-300
                 focus:ring-2 focus:ring-green-500
                 focus:outline-none
-                dark:bg-gray-700 dark:border-gray-600 dark:text-white
-              "
+                dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             />
           </div>
 
@@ -124,15 +126,14 @@ const Register = () => {
             type="submit"
             className="w-full py-2 rounded-lg
               bg-green-600 text-white font-semibold
-              hover:bg-green-700 transition
-            "
+              hover:bg-green-700 transition"
           >
             Register
           </button>
         </form>
 
         {/* FOOTER */}
-        <p className="text-center text-xs text-gray-500 dark:text-gray-400 mt-6">
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
           Already have an account?{" "}
           <Link
             to="/login"
@@ -140,7 +141,6 @@ const Register = () => {
           >
             Login
           </Link>
-
         </p>
       </div>
     </div>

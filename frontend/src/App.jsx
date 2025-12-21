@@ -9,20 +9,24 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* If logged in → dashboard */}
-        {token ? (
-          <>
-            <Route path="/" element={<TaskPage />} />
-            <Route path="*" element={<Navigate to="/" />} />
-          </>
-        ) : (
-          <>
-            {/* Auth pages */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="*" element={<Navigate to="/login" />} />
-          </>
-        )}
+        {/* Home route */}
+        <Route
+          path="/"
+          element={token ? <TaskPage /> : <Navigate to="/login" />}
+        />
+
+        {/* Auth routes */}
+        <Route
+          path="/login"
+          element={token ? <Navigate to="/" /> : <Login />}
+        />
+        <Route
+          path="/register"
+          element={token ? <Navigate to="/" /> : <Register />}
+        />
+
+        {/* Catch-all */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
   );

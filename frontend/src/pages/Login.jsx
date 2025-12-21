@@ -19,7 +19,8 @@ const Login = () => {
       });
 
       localStorage.setItem("token", res.data.token);
-      window.location.reload();
+      window.location.href = "/";
+
     } catch {
       setError("Invalid email or password");
     }
